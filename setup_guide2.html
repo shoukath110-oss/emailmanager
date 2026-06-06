@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Email Attachment Download Automation — Setup Guide</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+    background: #f5f6fa;
+    color: #1a1a2e;
+    font-size: 15px;
+    line-height: 1.7;
+  }
+
+  /* ── BANNER ── */
+  .banner {
+    background: linear-gradient(135deg, #0f3460 0%, #16213e 50%, #0f3460 100%);
+    color: white;
+    padding: 36px 40px 28px;
+    position: relative;
+    overflow: hidden;
+  }
+  .banner::before {
+    content: '';
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 240px; height: 240px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.04);
+  }
+  .banner::after {
+    content: '';
+    position: absolute;
+    bottom: -40px; left: 30%;
+    width: 160px; height: 160px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.03);
+  }
+  .banner-tag {
+    display: inline-block;
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 20px;
+    padding: 4px 14px;
+    font-size: 12px;
+    letter-spacing: 0.5px;
+    margin-bottom: 14px;
+    color: #a8d8ff;
+  }
+  .banner h1 {
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    margin-bottom: 10px;
+    line-height: 1.3;
+  }
+  .banner h1 span { color: #4fc3f7; }
+  .banner-sub {
+    font-size: 14px;
+    color: rgba(255,255,255,0.7);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .banner-sub a {
+    color: #4fc3f7;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-weight: 500;
+    transition: color 0.2s;
+  }
+  .banner-sub a:hover { color: #81d4fa; text-decoration: underline; }
+  .li-icon { width: 16px; height: 16px; vertical-align: middle; fill: #4fc3f7; }
+  .dot { opacity: 0.4; }
+
+  /* ── LAYOUT ── */
+  .container { max-width: 900px; margin: 0 auto; padding: 0 24px 60px; }
+
+  /* ── SECTION ── */
+  .section { margin-top: 40px; }
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid #e8eaf0;
+  }
+  .section-num {
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    background: #0f3460;
+    color: white;
+    font-weight: 700;
+    font-size: 14px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .section-num.special { background: #1565c0; }
+  .section-title { font-size: 19px; font-weight: 700; color: #0f3460; }
+
+  /* ── STEPS ── */
+  .steps { display: flex; flex-direction: column; gap: 14px; }
+  .step {
+    background: white;
+    border-radius: 10px;
+    border: 1px solid #e8eaf0;
+    padding: 16px 20px;
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+  }
+  .step-num {
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    background: #e3f2fd;
+    color: #1565c0;
+    font-weight: 700;
+    font-size: 12px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .step-content h4 { font-size: 14px; font-weight: 600; color: #1a1a2e; margin-bottom: 4px; }
+  .step-content p { font-size: 13.5px; color: #444; line-height: 1.6; }
+  .step-content p + p { margin-top: 6px; }
+
+  /* ── NOTE BOXES ── */
+  .note {
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-size: 13px;
+    margin-top: 10px;
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+  .note.info    { background: #e3f2fd; border-left: 3px solid #1565c0; color: #0d47a1; }
+  .note.warn    { background: #fff8e1; border-left: 3px solid #f9a825; color: #6d4c00; }
+  .note.success { background: #e8f5e9; border-left: 3px solid #2e7d32; color: #1b5e20; }
+  .note.danger  { background: #fce4ec; border-left: 3px solid #c62828; color: #b71c1c; }
+  .note-icon { font-size: 15px; flex-shrink: 0; margin-top: 1px; }
+
+  /* ── CODE ── */
+  code {
+    background: #f0f0f5;
+    border-radius: 4px;
+    padding: 1px 6px;
+    font-family: 'Courier New', monospace;
+    font-size: 12.5px;
+    color: #c62828;
+  }
+  .codeblock {
+    background: #1a1a2e;
+    border-radius: 8px;
+    padding: 14px 18px;
+    margin: 10px 0;
+    font-family: 'Courier New', monospace;
+    font-size: 13px;
+    color: #e0e0e0;
+    overflow-x: auto;
+    line-height: 1.8;
+  }
+  .codeblock .c-gray { color: #888; }
+  .codeblock .c-blue { color: #4fc3f7; }
+  .codeblock .c-green { color: #a5d6a7; }
+  .codeblock .c-yellow { color: #ffe082; }
+
+  /* ── FOLDER TREE ── */
+  .tree {
+    background: #1a1a2e;
+    border-radius: 10px;
+    padding: 20px 24px;
+    font-family: 'Courier New', monospace;
+    font-size: 13px;
+    line-height: 2;
+    color: #b0bec5;
+    margin: 12px 0;
+  }
+  .tree .folder { color: #4fc3f7; font-weight: 600; }
+  .tree .file-config { color: #a5d6a7; }
+  .tree .file-log { color: #ffe082; }
+  .tree .file-md { color: #ce93d8; }
+  .tree .arrow { color: #546e7a; font-size: 11px; margin-left: 8px; }
+
+  /* ── COMMAND TABLE ── */
+  .cmd-grid { display: flex; flex-direction: column; gap: 10px; margin-top: 4px; }
+  .cmd-row {
+    background: white;
+    border: 1px solid #e8eaf0;
+    border-radius: 10px;
+    padding: 14px 18px;
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+  }
+  .cmd-tag {
+    background: #0f3460;
+    color: white;
+    border-radius: 6px;
+    padding: 4px 10px;
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    white-space: nowrap;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .cmd-tag.purple { background: #4a148c; }
+  .cmd-tag.teal   { background: #00695c; }
+  .cmd-row p { font-size: 13.5px; color: #333; line-height: 1.5; }
+  .cmd-row p b { color: #1a1a2e; }
+
+  /* ── CONFIG TABLE ── */
+  .config-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 12px; }
+  .config-table th {
+    background: #0f3460;
+    color: white;
+    padding: 10px 14px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 12px;
+  }
+  .config-table td { padding: 9px 14px; border-bottom: 1px solid #eee; vertical-align: top; }
+  .config-table tr:nth-child(even) td { background: #f9fafc; }
+  .config-table tr:hover td { background: #f0f4ff; }
+  .config-table .req { color: #c62828; font-size: 11px; font-weight: 600; }
+  .config-table .opt { color: #2e7d32; font-size: 11px; font-weight: 600; }
+
+  /* ── ROUTING BOX ── */
+  .routing {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-top: 12px;
+  }
+  .route-card {
+    border-radius: 10px;
+    padding: 18px 20px;
+    border: 2px solid transparent;
+  }
+  .route-card.cc {
+    background: #e8f5e9;
+    border-color: #2e7d32;
+  }
+  .route-card.inv {
+    background: #e3f2fd;
+    border-color: #1565c0;
+  }
+  .route-card h4 { font-size: 14px; font-weight: 700; margin-bottom: 8px; }
+  .route-card.cc h4 { color: #1b5e20; }
+  .route-card.inv h4 { color: #0d47a1; }
+  .route-card p { font-size: 13px; color: #444; line-height: 1.6; }
+  .route-card code { background: rgba(0,0,0,0.07); }
+
+  /* ── TROUBLE ── */
+  .trouble { display: flex; flex-direction: column; gap: 12px; margin-top: 4px; }
+  .trouble-item {
+    background: white;
+    border-radius: 10px;
+    border: 1px solid #e8eaf0;
+    border-left: 4px solid #f9a825;
+    padding: 14px 18px;
+  }
+  .trouble-item h4 { font-size: 13.5px; font-weight: 600; color: #1a1a2e; margin-bottom: 5px; }
+  .trouble-item p { font-size: 13px; color: #555; line-height: 1.6; }
+
+  /* ── PASSWORDS ── */
+  .pw-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 12px; }
+  .pw-table th { background: #4a148c; color: white; padding: 10px 14px; text-align: left; font-size: 12px; }
+  .pw-table td { padding: 9px 14px; border-bottom: 1px solid #eee; }
+  .pw-table tr:nth-child(even) td { background: #f9f5ff; }
+
+  /* ── BADGE ── */
+  .badge {
+    display: inline-block;
+    border-radius: 4px;
+    padding: 2px 8px;
+    font-size: 11px;
+    font-weight: 600;
+    margin-left: 6px;
+    vertical-align: middle;
+  }
+  .badge.new { background: #e8f5e9; color: #2e7d32; }
+  .badge.key { background: #fff3e0; color: #e65100; }
+
+  /* ── FOOTER ── */
+  .footer {
+    margin-top: 60px;
+    padding: 24px 40px;
+    background: #1a1a2e;
+    color: rgba(255,255,255,0.5);
+    text-align: center;
+    font-size: 12.5px;
+  }
+  .footer a { color: #4fc3f7; text-decoration: none; }
+
+  @media (max-width: 600px) {
+    .banner { padding: 24px 20px; }
+    .container { padding: 0 16px 40px; }
+    .routing { grid-template-columns: 1fr; }
+    .banner h1 { font-size: 22px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- BANNER -->
+<div class="banner">
+  <div class="banner-tag">📎 Cowork Automation</div>
+  <h1>Email Attachment <span>Download</span> Automation</h1>
+  <div class="banner-sub">
+    Created by
+    <a href="https://www.linkedin.com/in/shoukath-fin-aud-pro" target="_blank" rel="noopener">
+      <svg class="li-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+        <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+      </svg>
+      Shoukath Ali
+    </a>
+    <span class="dot">·</span>
+    Finance & Audit Professional
+    <span class="dot">·</span>
+    UAE
+  </div>
+</div>
+
+<!-- MAIN CONTENT -->
+<div class="container">
+
+  <!-- OVERVIEW -->
+  <div class="section">
+    <p style="font-size:15px; color:#444; margin-top:28px; line-height:1.8;">
+      This setup lets you automatically download, process, and extract data from email invoices and credit card statements using <strong>Claude AI (Cowork mode)</strong>. Once installed, you run the entire workflow by typing simple commands — no coding needed.
+    </p>
+    <div class="note info" style="margin-top:16px;">
+      <span class="note-icon">ℹ️</span>
+      <span>This guide covers a <strong>one-time setup</strong> of about 10–15 minutes. After that, running your workflow takes a few seconds per command.</span>
+    </div>
+  </div>
+
+  <!-- SECTION 1 — PREREQUISITES -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">1</div>
+      <div class="section-title">Prerequisites — what you need first</div>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">A</div>
+        <div class="step-content">
+          <h4>Claude account — Pro or Max plan</h4>
+          <p>Go to <a href="https://claude.ai" target="_blank">claude.ai</a> and sign up or upgrade. The Cowork feature (which powers this automation) requires a paid plan.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">B</div>
+        <div class="step-content">
+          <h4>Claude desktop app</h4>
+          <p>Download from <a href="https://claude.ai/download" target="_blank">claude.ai/download</a> and install on your PC (Windows). This is where you run Cowork mode.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">C</div>
+        <div class="step-content">
+          <h4>Claude in Chrome extension</h4>
+          <p>Install the <strong>Claude in Chrome</strong> extension from the Chrome Web Store. This is needed so Claude can open Gmail in your browser and click download buttons to save attachments.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">D</div>
+        <div class="step-content">
+          <h4>Gmail account (the one that receives your statements)</h4>
+          <p>Make sure you are logged in to this Gmail account in your Chrome browser.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 2 — DOWNLOAD & EXTRACT -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">2</div>
+      <div class="section-title">Download & extract the template</div>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-content">
+          <h4>Download the ZIP file</h4>
+          <p>Download <code>invoice_automation_template.zip</code> (shared with you).</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-content">
+          <h4>Extract it anywhere on your PC</h4>
+          <p>The folder path does <strong>not matter</strong> — put it wherever suits you:</p>
+          <div class="codeblock">
+            <span class="c-blue">D:\shoukathailabs\project\invoices\</span>   <span class="c-gray">← works</span><br>
+            <span class="c-blue">C:\Users\yourname\invoices\</span>  <span class="c-gray">← works</span><br>
+            <span class="c-blue">E:\Finance\statements\</span>        <span class="c-gray">← works</span>
+          </div>
+          <div class="note info">
+            <span class="note-icon">ℹ️</span>
+            <span>Claude works through the Cowork folder mount — it does not care where on your drive the folder lives.</span>
+          </div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-content">
+          <h4>Resulting folder structure</h4>
+          <div class="tree">
+            <span class="folder">invoices\</span><br>
+            &nbsp;&nbsp;├── <span class="folder">configs\</span><br>
+            &nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;└── <span class="file-config">Invoice_Automation_Config.xlsx</span> <span class="arrow">← your config (edit this)</span><br>
+            &nbsp;&nbsp;├── <span class="file-log">Invoice_Logs.xlsx</span> <span class="arrow">← Claude writes here (do not edit)</span><br>
+            &nbsp;&nbsp;├── <span class="file-md">CLAUDE.md</span>  <span class="file-md">system.md</span>  <span class="file-md">agent.md</span>  <span class="file-md">SETUP.md</span><br>
+            &nbsp;&nbsp;├── <span class="folder">Inbox\</span> <span class="arrow">← downloaded files land here</span><br>
+            &nbsp;&nbsp;├── <span class="folder">Recorded\</span> <span class="arrow">← processed regular invoices</span><br>
+            &nbsp;&nbsp;├── <span class="folder">cardextracted\</span> <span class="arrow">← processed card statements</span><br>
+            &nbsp;&nbsp;└── <span class="folder">Error\</span> <span class="arrow">← failed files for review</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 3 — CONFIG -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">3</div>
+      <div class="section-title">Fill in your config file</div>
+    </div>
+    <p style="color:#444; margin-bottom:14px;">Open <code>configs\Invoice_Automation_Config.xlsx</code> and replace the sample rows (highlighted yellow) with your real suppliers. One row per supplier/bank.</p>
+
+    <div class="note warn">
+      <span class="note-icon">⚠️</span>
+      <span><strong>Important:</strong> After filling in your config, save and close the file before running any Claude command. Claude cannot read a file that is open in Excel.</span>
+    </div>
+
+    <table class="config-table" style="margin-top:16px;">
+      <thead>
+        <tr>
+          <th>Column</th>
+          <th>What to enter</th>
+          <th>Example</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>Company Name</strong> <span class="req">required</span></td><td>Your company or your name</td><td>SHOUKATH</td></tr>
+        <tr><td><strong>Supplier / Vendor</strong> <span class="req">required</span></td><td>Bank or supplier name. <strong>End with <code>cc</code></strong> for credit card statements (e.g. <code>RAK CC</code>)</td><td>RAK CC / Emirates Paper Mart</td></tr>
+        <tr><td><strong>From Email</strong> <span class="req">required</span></td><td>The sender's email address</td><td>estatement@rakbank.ae</td></tr>
+        <tr><td><strong>Subject Keyword</strong> <span class="req">required</span></td><td>A word or phrase from the email subject</td><td>RAKBANK Credit Card e-Statement</td></tr>
+        <tr><td><strong>Body Keywords</strong> <span class="opt">optional</span></td><td>Words that appear in the email body (comma-separated, OR logic)</td><td>Please find attached your e-Statement</td></tr>
+        <tr><td><strong>Date From / Date To</strong> <span class="req">required</span></td><td>Date range to search in Gmail (DD/MM/YYYY)</td><td>01/01/2026 → 31/05/2026</td></tr>
+        <tr><td><strong>Invoice Type</strong> <span class="req">required</span></td><td><code>PDF_PWD</code> for password-protected PDFs, <code>PDF</code> for plain PDFs, <code>EXCEL_PWD</code> for Excel</td><td>PDF_PWD</td></tr>
+        <tr><td><strong>File Password</strong> <span class="opt">see note</span></td><td>Password to open the file. See password formats below.</td><td>ABCD2509</td></tr>
+        <tr><td><strong>Download Folder Path</strong> <span class="req">⚠️ required</span></td><td><strong>Must match your actual Inbox path on your PC</strong></td><td>D:\shoukathailabs\project\invoices\Inbox</td></tr>
+        <tr><td><strong>File Prefix Pattern</strong></td><td>Leave as-is</td><td>{Company}_{Supplier}_{Month}</td></tr>
+        <tr><td><strong>Active (Y/N)</strong> <span class="req">required</span></td><td>Y = include this row, N = ignore</td><td>Y</td></tr>
+        <tr><td><strong>Remove Password (Y/N)</strong> <span class="badge new">New</span></td><td>Y = automatically strip PDF password after download</td><td>Y</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- SECTION 4 — CONNECT GMAIL -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">4</div>
+      <div class="section-title">Connect Gmail to Cowork</div>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-content">
+          <h4>Open the Claude desktop app</h4>
+          <p>Launch the Claude app and switch to <strong>Cowork mode</strong> (bottom-left of the app).</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-content">
+          <h4>Add the Gmail connector</h4>
+          <p>In the Cowork sidebar, click <strong>Plugins / Connectors → Add Connector → Gmail</strong>. Authorise access with your Google account.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-content">
+          <h4>Connect your invoices folder</h4>
+          <p>Click <strong>Connect folder</strong> (or the folder icon) and select your <code>invoices\</code> folder — wherever you extracted it. Claude will read <code>CLAUDE.md</code> automatically and know all the commands.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-content">
+          <h4>Make sure Chrome is open with the extension</h4>
+          <p>The Claude in Chrome extension must be active in your browser. Claude uses it to click download buttons in Gmail when fetching attachments.</p>
+          <div class="note success">
+            <span class="note-icon">✅</span>
+            <span>You're now set up. Type your first command and Claude will do the rest.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 5 — COMMANDS -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num special">5</div>
+      <div class="section-title">Commands — what you can type</div>
+    </div>
+    <p style="color:#444; margin-bottom:16px;">Just type these in Claude (Cowork). No slashes or special syntax needed.</p>
+
+    <div class="cmd-grid">
+      <div class="cmd-row">
+        <div class="cmd-tag">extract email</div>
+        <p><b>Download new emails</b> — searches Gmail for each active supplier in your config, finds matching emails, downloads attachments to your Inbox folder. Already-downloaded emails are automatically skipped (dedup by Gmail Message ID).</p>
+      </div>
+      <div class="cmd-row">
+        <div class="cmd-tag">extract card</div>
+        <p><b>Process credit card statements</b> — reads all files in Inbox where the supplier name ends in <code>cc</code>, extracts card data (card last 4, statement date, due date, min due, total due), writes to DATACARD tab, moves files to <code>cardextracted\</code>.</p>
+      </div>
+      <div class="cmd-row">
+        <div class="cmd-tag">extract invoice</div>
+        <p><b>Process regular invoices</b> — reads all files in Inbox where supplier does <em>not</em> end in <code>cc</code>, extracts invoice fields (invoice number, date, amounts, tax), writes to DATA tab, moves files to <code>Recorded\</code>.</p>
+      </div>
+      <div class="cmd-row">
+        <div class="cmd-tag">extract all</div>
+        <p><b>Run both</b> — runs extract invoice then extract card in sequence. Useful after a batch email download.</p>
+      </div>
+      <div class="cmd-row">
+        <div class="cmd-tag purple">remove password</div>
+        <p><b>Strip PDF passwords from Inbox</b> — opens each file using the password in your config and saves it without password protection. Files stay in the same folder. Default target: Inbox.</p>
+      </div>
+      <div class="cmd-row">
+        <div class="cmd-tag purple">remove password in cardextracted</div>
+        <p><b>Strip passwords from cardextracted folder</b> — same as above but targets a different folder. You can also use <code>remove password in recorded</code> or <code>remove password in error</code>.</p>
+      </div>
+    </div>
+
+    <div class="note info" style="margin-top:16px;">
+      <span class="note-icon">💡</span>
+      <span><strong>Typical daily workflow:</strong> <code>extract email</code> → <code>extract all</code> → done. Review results in <code>Invoice_Logs.xlsx</code>.</span>
+    </div>
+  </div>
+
+  <!-- SECTION 6 — HOW ROUTING WORKS -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">6</div>
+      <div class="section-title">How routing works — CC vs regular invoices</div>
+    </div>
+    <p style="color:#444; margin-bottom:12px;">Claude looks at the <strong>last 2 characters of the Supplier/Vendor name</strong> to decide which tab to write data to:</p>
+    <div class="routing">
+      <div class="route-card cc">
+        <h4>💳 Credit card statement</h4>
+        <p>Supplier name ends in <code>cc</code> (case-insensitive)<br>e.g. <code>RAK CC</code>, <code>EI CC</code>, <code>ADCB CC</code></p>
+        <p style="margin-top:8px;">→ Data written to <strong>DATACARD</strong> tab<br>→ File moved to <code>cardextracted\</code></p>
+      </div>
+      <div class="route-card inv">
+        <h4>🧾 Regular invoice</h4>
+        <p>Supplier name does <em>not</em> end in <code>cc</code><br>e.g. <code>Emirates Paper Mart</code>, <code>Al Shifa Trading LLC</code></p>
+        <p style="margin-top:8px;">→ Data written to <strong>DATA</strong> tab<br>→ File moved to <code>Recorded\</code></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 7 — DEDUP -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">7</div>
+      <div class="section-title">Duplicate prevention — how it works</div>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">📧</div>
+        <div class="step-content">
+          <h4>Extract email — hard skip</h4>
+          <p>Each downloaded email's <strong>Gmail Message ID</strong> is saved in the DOWNLOAD_LOG. If you run <code>extract email</code> again on the same date range, Claude checks the log first — any email already downloaded with status SUCCESS is skipped entirely. No duplicate downloads.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">📄</div>
+        <div class="step-content">
+          <h4>Extract card / invoice — soft flag</h4>
+          <p>Files are never skipped (you may have added them manually to Inbox). But if a filename already appears in EXTRACTION_LOG with status SUCCESS, the extracted data row is marked <code>_suspect duplicate</code> in the Remarks column so you can review and delete it if needed.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 8 — PASSWORD FORMATS -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">8</div>
+      <div class="section-title">Common UAE bank password formats</div>
+    </div>
+    <table class="pw-table">
+      <thead>
+        <tr>
+          <th>Bank</th>
+          <th>Password format</th>
+          <th>Example</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>Emirates NBD / Emirates Islamic</strong></td><td>First 4 chars of name (CAPS) + DDMM of date of birth</td><td><code>ABCD2509</code></td></tr>
+        <tr><td><strong>RAKBANK</strong></td><td>Last 4 digits of card + DDMM of date of birth</td><td><code>83472509</code></td></tr>
+        <tr><td><strong>ADCB</strong></td><td>Customer ID (8 digits — find it in the ADCB app)</td><td><code>47291836</code></td></tr>
+        <tr><td><strong>HSBC</strong></td><td>DDMMYY of birth + last 4 digits of card</td><td>Check your statement email</td></tr>
+        <tr><td><strong>FAB / Other banks</strong></td><td>Varies — check the password hint in the statement email</td><td>—</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- SECTION 9 — VIEWING RESULTS -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">9</div>
+      <div class="section-title">Viewing your results</div>
+    </div>
+    <p style="color:#444; margin-bottom:14px;">Open <code>Invoice_Logs.xlsx</code> in the root of your invoices folder. It contains 5 tabs:</p>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num" style="background:#1565c0;">DL</div>
+        <div class="step-content">
+          <h4>DOWNLOAD_LOG</h4>
+          <p>Every email download attempt — supplier, date, original filename, saved filename, status, Gmail Message ID.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num" style="background:#2e7d32;">EX</div>
+        <div class="step-content">
+          <h4>EXTRACTION_LOG</h4>
+          <p>Every file processed — outcome (SUCCESS / FAILED / SKIPPED), where it was moved, suspect duplicate flags.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num" style="background:#4a148c;">DC</div>
+        <div class="step-content">
+          <h4>DATACARD</h4>
+          <p>Extracted credit card data — card last 4, statement date, period, due date, minimum due, total due.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num" style="background:#e65100;">DA</div>
+        <div class="step-content">
+          <h4>DATA</h4>
+          <p>Extracted regular invoice data — invoice number, date, supplier name, amounts, tax.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num" style="background:#b71c1c;">ER</div>
+        <div class="step-content">
+          <h4>ERROR_LOG</h4>
+          <p>Files that failed — error type, suggested fix, which config column to correct.</p>
+        </div>
+      </div>
+    </div>
+    <div class="note warn" style="margin-top:14px;">
+      <span class="note-icon">⚠️</span>
+      <span>Do not edit <code>Invoice_Logs.xlsx</code> — Claude overwrites it each run. Open it to view, then close it before running any command.</span>
+    </div>
+  </div>
+
+  <!-- SECTION 10 — TROUBLESHOOTING -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">10</div>
+      <div class="section-title">Troubleshooting</div>
+    </div>
+    <div class="trouble">
+      <div class="trouble-item">
+        <h4>❌ "No emails found" for a supplier</h4>
+        <p>Check that <strong>From Email</strong> and <strong>Subject Keyword</strong> in your config exactly match what arrives in Gmail. Also verify that <strong>Date From / Date To</strong> covers the period the email was sent. You can test by manually searching in Gmail with those same terms.</p>
+      </div>
+      <div class="trouble-item">
+        <h4>❌ Password error when opening PDF</h4>
+        <p>Double-check the password format in config column J. Common mistakes: RAKBANK uses the last 4 digits of the card (not a fixed code); ENBD uses first 4 chars of name exactly as embossed on card (no middle initials). Re-read the password hint inside the bank's email.</p>
+      </div>
+      <div class="trouble-item">
+        <h4>❌ Config not being read / Claude using old data</h4>
+        <p>The config file must be in the <code>configs\</code> subfolder of the connected folder. Make sure you saved and closed it in Excel before running the command. If Claude still shows stale data, try: save the file, close Excel completely, wait 5 seconds, then retry the command.</p>
+      </div>
+      <div class="trouble-item">
+        <h4>❌ Invoice_Logs.xlsx looks blank or broken</h4>
+        <p>Close the file in Excel completely (including from the taskbar) and tell Claude to "re-copy the log file". Claude keeps a working copy in memory and will push it back to the folder.</p>
+      </div>
+      <div class="trouble-item">
+        <h4>❌ Chrome extension not connecting</h4>
+        <p>Make sure the Claude in Chrome extension is installed and enabled in Chrome extensions page (<code>chrome://extensions</code>). The extension icon should be visible in your Chrome toolbar. If Claude says "multiple browsers connected", click the extension icon and choose "Connect" in the correct browser window.</p>
+      </div>
+      <div class="trouble-item">
+        <h4>❌ File ends up in Error\ folder</h4>
+        <p>Open <code>Invoice_Logs.xlsx</code> → ERROR_LOG tab. The <strong>Suggested Fix</strong> and <strong>Config Column to Fix</strong> columns tell you exactly what to correct. After fixing the config, move the file back to Inbox manually and run <code>extract card</code> or <code>extract invoice</code> again.</p>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+  <p>Email Attachment Download Automation &nbsp;·&nbsp; Created by <a href="https://www.linkedin.com/in/shoukath-fin-aud-pro" target="_blank">Shoukath Ali</a> &nbsp;·&nbsp; Built with Claude AI (Cowork mode)</p>
+</div>
+
+</body>
+</html>
